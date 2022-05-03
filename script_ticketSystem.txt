@@ -1,0 +1,205 @@
+const rangeCheckbox = "DataInfo!Q2:Q"
+const range = SpreadsheetApp.getActive().getRange(rangeCheckbox);
+const rangeOpenClose = "DataInfo!P2:P"
+const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+function selectedCell(){
+  return SpreadsheetApp.getActiveSpreadsheet().getActiveCell();
+}
+function insertCheckboxes(){
+  sheet.getRange(rangeCheckbox).insertCheckboxes();
+}
+function autoResizeSingleColumn() {
+ SpreadsheetApp.getActiveSheet().autoResizeColumn(3);
+}
+function progressStatus() {
+  // A partir da celula selecionada, o ticket ira ser (x,+CASA) CASA ao lado direito
+  var ticket = selectedCell().offset(0,1);
+  var sendStatus = selectedCell().offset(0,2);
+
+  // progress = has already been resolved == ticket is close and sendStatus is Yes
+  if (selectedCell().getValue() == 'has already been resolved!'){
+    sendStatus.setValue('Yes');
+    ticket.setValue('Close')
+  }
+  // progress = has not been resolved yet! == ticket is open
+  if (selectedCell().getValue() == 'has not been resolved yet!') {
+    ticket.setValue('Open')
+  }
+}
+function ticketOpenClose() {
+  var sendStatus = selectedCell().offset(0,1);
+  // A partir da celula selecionada, o ticket ira ser (x,-CASA) CASA ao lado esquerdo
+  var progress = selectedCell().offset(0,-1);
+  // sendStatus = yes e entao ticket fechado = problema resolvido
+  if (selectedCell().getValue() == 'Close'){
+    sendStatus.setValue('Yes')
+    if (progress.getValue() == 'has not been resolved yet!'){
+      progress.setValue('has already been resolved!')
+    }//
+    if (sendStatus.getValue() == 'Yes'){
+      progress.setValue('has already been resolved!')
+    }
+  }
+  if (selectedCell().getValue() == 'Open'){
+    if (sendStatus.getValue() == 'Yes'){
+      progress.setValue('has not been resolved yet!')
+    }
+  }
+}
+function sendStatus(){
+  var ticket = selectedCell().offset(0,-1);
+  var progress = selectedCell().offset(0,-2);
+
+  if (selectedCell().getValue() == 'Yes'){
+    
+    if (ticket.getValue() == ('Open')){
+      progress.setValue('has not been resolved yet!')
+    } else{
+  ticket.setValue('Close')
+    }
+  }
+  if (selectedCell().getValue() == 'No'){
+    if (ticket.getValue() == 'Close'){
+      ticket.setValue('Open')
+    }
+    progress.setValue('sthas not been resolved yet!')
+  }
+}
+function insertCheckboxes(){
+  var lastRow = sheet.getLastRow()
+  sheet.getRange("Q2:Q" + lastRow).insertCheckboxes("Yes");
+}
+function insertCustomCheckboxes() {
+  range.insertCheckboxes("Yes");
+}
+function autoEmail_submit(){
+  // var sheet = SpreadsheetApp.getActiveSheet();
+  // var dataRange = sheet.getDataRange()
+  // var data = dataRange.getValues()
+  // for(var i = 1; i < data.length; i++){
+  //   var row = data[i]
+  //   var emailAddress = row[1]
+  //   var message = "Nossa equipe já irá atende-lo!"
+  //   var ticket = row[14]
+  var activeSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    for (let idx = 2; idx <= sheet.getLastRow(); idx++) {
+      // email of the person who needs help
+      let emailPersonNeedsHelp = activeSheet.getRange(idx,2).getValue()
+      // person need help
+      let personNeedHelp = activeSheet.getRange(idx,3).getValue()
+      // item that have a problem
+      let item = activeSheet.getRange(idx,4).getValue()
+      // place
+      let place = activeSheet.getRange(idx,6).getValue()
+      //ticket
+      let ticket = activeSheet.getRange(idx, 16).getValue()
+      //marcar ticket open
+      let ticketOpenClose = activeSheet.getRange(idx, 16)
+
+      if(place == "ECC"){classroom = activeSheet.getRange(idx,10).getValue()}
+      else if(place == "Elementary"){classroom = activeSheet.getRange(idx,9).getValue()}
+      else if(place == "Middle School"){classroom = activeSheet.getRange(idx,8).getValue()}
+      else if(place == "High School"){classroom = activeSheet.getRange(idx,7).getValue()}
+      else if(place == "WildCat Arena"){classroom = activeSheet.getRange(idx, 11).getValue()}
+      else{classroom = ""}
+      if(ticket == ""){
+        MailApp.sendEmail(
+          // recipient  
+          emailPersonNeedsHelp,
+
+          // subject
+          "[Tech Support] Your request for " + item, 
+                  
+          // body
+          "Hello, "+personNeedHelp+"!"+'\n\n'+'    Your support request "'+item+" in the "+ place + classroom+'" ' + "has been received and our     team will contact you as soon as possible." 
+                  
+          + "\n\n" + "Technology Department" + ".");
+        ticketOpenClose.setValue('Open')        
+        SpreadsheetApp.flush()
+        
+      }
+
+  }
+}
+function sendEmail(){
+  const ui = SpreadsheetApp.getUi();
+
+  ui.alert('Email Response','Do you want to send this email(s) ?',ui.ButtonSet.YES_NO);
+  // if(ui.Button.NO){
+  //   ui.alert('No emails have been sent!');
+  // }
+  if(ui.Button.YES){
+    var activeSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+      for (let idx = 2; idx <= sheet.getLastRow(); idx++) {
+        // email of the person who needs help
+        let emailPersonNeedsHelp = activeSheet.getRange(idx,2).getValue()
+        // person need help
+        let personNeedHelp = activeSheet.getRange(idx,3).getValue()
+        // item that have a problem
+        let item = activeSheet.getRange(idx,4).getValue()
+        // place
+        let place = activeSheet.getRange(idx,6).getValue()
+        // progress
+        let progress = activeSheet.getRange(idx,15).getValue()
+        // more Information
+        let moreInformation = activeSheet.getRange(idx,13).getValue()
+        // who will resolve
+        let personResolve = activeSheet.getRange(idx,14).getValue()
+        // chechbox column
+        let checkbox = activeSheet.getRange(idx,17)
+        // column "Email Sent"
+        let emailSent = activeSheet.getRange(idx,18)
+
+        if(place == "ECC"){classroom = activeSheet.getRange(idx,11).getValue()}
+        else if(place == "Elementary"){classroom = activeSheet.getRange(idx,10).getValue()}
+        else if(place == "Middle School"){classroom = activeSheet.getRange(idx,9).getValue()}
+        else if(place == "High School"){classroom = activeSheet.getRange(idx,8).getValue()}
+        else if(place == "WildCat Arena"){classroom = activeSheet.getRange(idx,7).getValue()}
+        else{classroom = ""}
+        // if(checkbox.isChecked()=="FALSE"){
+        //   ui.alert('Any checkbox is checked!');
+        // }
+        if (checkbox.isChecked()){
+          if(personResolve == ""){
+            ui.alert('The field of the person who solved the problem is empty')
+            // checkbox.uncheck();
+          }
+          // else if()    
+          else{
+              MailApp.sendEmail(
+              // recipient  
+              emailPersonNeedsHelp,
+
+              // subject
+              "[Tech Support] Your request for " + item, 
+                
+              // body
+              "Hello, "+personNeedHelp+"!"+'\n\n'+'    Your support request "'+item+" in the "+ place + classroom+'" ' + progress 
+
+              + "\n\n" + "    " + moreInformation
+
+                
+              + "\n\n" + personResolve + ".");
+
+              emailSent.setValue("✅");
+              // checkbox.uncheck();
+            } 
+          checkbox.uncheck();
+        } 
+      };
+  } 
+}
+function onEdit(){
+  insertCheckboxes()
+  progressStatus()
+  sendStatus()
+  ticketOpenClose()
+  autoResizeSingleColumn()
+}
+function onOpen(){
+  SpreadsheetApp.getUi()
+  .createMenu("Menu")
+    .addItem('Send Emails', 'sendEmail')
+    .addToUi()
+}
