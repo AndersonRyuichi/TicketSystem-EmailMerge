@@ -74,14 +74,6 @@ function insertCustomCheckboxes() {
   range.insertCheckboxes("Yes");
 }
 function autoEmail_submit(){
-  // var sheet = SpreadsheetApp.getActiveSheet();
-  // var dataRange = sheet.getDataRange()
-  // var data = dataRange.getValues()
-  // for(var i = 1; i < data.length; i++){
-  //   var row = data[i]
-  //   var emailAddress = row[1]
-  //   var message = "Nossa equipe já irá atende-lo!"
-  //   var ticket = row[14]
   var activeSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     for (let idx = 2; idx <= sheet.getLastRow(); idx++) {
       // email of the person who needs help
@@ -126,9 +118,6 @@ function sendEmail(){
   const ui = SpreadsheetApp.getUi();
 
   ui.alert('Email Response','Do you want to send this email(s) ?',ui.ButtonSet.YES_NO);
-  // if(ui.Button.NO){
-  //   ui.alert('No emails have been sent!');
-  // }
   if(ui.Button.YES){
     var activeSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
       for (let idx = 2; idx <= sheet.getLastRow(); idx++) {
@@ -157,9 +146,6 @@ function sendEmail(){
         else if(place == "High School"){classroom = activeSheet.getRange(idx,8).getValue()}
         else if(place == "WildCat Arena"){classroom = activeSheet.getRange(idx,7).getValue()}
         else{classroom = ""}
-        // if(checkbox.isChecked()=="FALSE"){
-        //   ui.alert('Any checkbox is checked!');
-        // }
         if (checkbox.isChecked()){
           if(personResolve == ""){
             ui.alert('The field of the person who solved the problem is empty')
